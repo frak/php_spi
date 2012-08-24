@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE extension SYSTEM "../extension.dtd">
+<extension name="spi" version="0.1.0">
+    <summary>A PHP extension for accessing SPI</summary>
+    <description>Wraps the low level ioctl calls needed to access the SPI, created mostly for the RaspberryPi but should work elsewhere.</description>
+    <maintainers>
+        <maintainer>
+            <user>frak</user>
+            <name>Michael Davey</name>
+            <email>frak.off@gmail.com</email>
+            <role>lead</role>
+        </maintainer>
+    </maintainers>
+    <license>PHP</license>
+    <release>
+        <version>0.1.0</version>
+        <date>2012-08-20</date>
+        <state>alpha</state>
+        <notes>Starting a bit smaller with this one...</notes>
+    </release>
+    <changelog/>
+    <constants>
+        <constant name="SPI_MODE_0" type="int" value="0" />
+        <constant name="SPI_MODE_1" type="int" value="0" />
+        <constant name="SPI_MODE_2" type="int" value="0" />
+        <constant name="SPI_MODE_3" type="int" value="0" />
+        <constant name="SPI_CPOL" type="int" value="0" />
+        <constant name="SPI_CPHA" type="int" value="0" />
+    </constants>
+    <class name="Spi">
+        <property name="device" access="private" type="long" value="-1" />
+        <function access="public" name="__construct">
+            <proto>void __construct(int bus, int chipselect[, array options])</proto>
+        </function>
+        <function access="public" name="__destruct">
+            <proto>void __destruct()</proto>
+        </function>
+        <function access="public" name="transfer">
+            <proto>array transfer(array data)</proto>
+        </function>
+        <function access="public" name="write">
+            <proto>int write(array data)</proto>
+        </function>
+        <function access="public" name="read">
+            <proto>array read(int length)</proto>
+        </function>
+    </class>
+</extension>

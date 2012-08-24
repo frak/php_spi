@@ -1,0 +1,5 @@
+<!ENTITY reference.spi.reference SYSTEM './spi/reference.xml'>
+<!ENTITY reference.spi.constants SYSTEM './spi/constants.xml'>
+<!ENTITY reference.spi.ini SYSTEM './spi/ini.xml'>
+<!ENTITY reference.spi.configure SYSTEM './spi/configure.xml'>
+<!ENTITY reference.spi.functions SYSTEM './functions.xml'>

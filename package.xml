@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
+<package>
+
+  <name>spi</name>
+  <summary>A PHP extension for accessing SPI</summary>
+  <description>
+Wraps the low level ioctl calls needed to access the SPI, created mostly for the RaspberryPi but should work elsewhere.
+  </description>
+
+  <license>PHP</license>
+
+  <maintainers>
+    <maintainer>
+      <user>frak</user>
+      <name>Michael Davey</name>
+      <email>frak.off@gmail.com</email>
+      <role>lead</role>
+    </maintainer>
+  </maintainers>
+
+  <release>
+    <version>0.1.0</version>
+    <state>alpha</state>
+    <notes>Starting a bit smaller with this one...</notes>
+    <date>2012-08-20</date>
+  </release>
+  <changelog>
+
+  </changelog>
+  <deps>
+    <dep type="php" rel="ge" version="5.0.0"/>
+  </deps>
+
+  <filelist>
+    <dir name="/">
+      <file role='doc' name='EXPERIMENTAL'/>
+      <file role='doc' name='CREDITS'/>
+      <file role='src' name='config.m4'/>
+      <file role='src' name='spi.dsp'/>
+      <file role='src' name='config.w32'/>
+      <file role='src' name='spi.c'/>
+      <file role='src' name='php_spi.h'/>
+      <dir name="tests">
+        <file role='test' name='Spi____construct.phpt'/>
+        <file role='test' name='Spi____destruct.phpt'/>
+        <file role='test' name='Spi__transfer.phpt'/>
+        <file role='test' name='Spi__write.phpt'/>
+        <file role='test' name='Spi__read.phpt'/>
+      </dir>
+    </dir>
+  </filelist>
+</package>
