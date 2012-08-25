@@ -163,7 +163,7 @@ PHP_METHOD(Spi, __construct)
 
     zend_update_property_long(_this_ce, _this_zval, "delay", 5, delay TSRMLS_DC);
 
-    php_printf("Device: %s - Mode: %d, Bits: %d, Speed: %d, Delay: %d\n", device, mode, bits, speed, delay);
+    //php_printf("Device: %s - Mode: %d, Bits: %d, Speed: %d, Delay: %d\n", device, mode, bits, speed, delay);
 }
 /* }}} __construct */
 
@@ -220,26 +220,23 @@ PHP_METHOD(Spi, transfer)
     uint16_t delay = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "delay", 5, 0 TSRMLS_CC));
 
     int count = zend_hash_num_elements(data_hash);
-    php_printf("We were passed %d elements\n", count);
 
     unsigned char *tx;
-    unsigned char *rx;
     tx = malloc(count);
-    rx = malloc(count);
 
+    int i = 0;
     zval **arr_value;
     for(zend_hash_internal_pointer_reset(data_hash);
         zend_hash_get_current_data(data_hash, (void **)&arr_value) == SUCCESS;
         zend_hash_move_forward(data_hash)) {
 
         int byte = (int)Z_LVAL_PP(arr_value);
-        *tx = byte;
-        ++tx;
+        tx[i++] = byte;
     }
 
     struct spi_ioc_transfer tr = {
         .tx_buf = (unsigned long)tx,
-        .rx_buf = (unsigned long)rx,
+        .rx_buf = (unsigned long)tx, // thanks to gordonDrogon for this tip
         .len = count,
         .delay_usecs = delay,
         .speed_hz = speed,
@@ -252,9 +249,8 @@ PHP_METHOD(Spi, transfer)
     }
 
     array_init(return_value);
-    int i;
     for(i = 0; i < count; ++i) {
-        long value = rx[i];
+        int value = tx[i];
         add_next_index_long(return_value, value);
     }
 
@@ -295,10 +291,10 @@ zend_module_entry spi_module_entry = {
     STANDARD_MODULE_HEADER,
     "spi",
     NULL,
-    PHP_MINIT(spi),     /* Replace with NULL if there is nothing to do at php startup   */
-    PHP_MSHUTDOWN(spi), /* Replace with NULL if there is nothing to do at php shutdown  */
-    PHP_RINIT(spi),     /* Replace with NULL if there is nothing to do at request start */
-    PHP_RSHUTDOWN(spi), /* Replace with NULL if there is nothing to do at request end   */
+    PHP_MINIT(spi),
+    NULL,
+    NULL,
+    NULL,
     PHP_MINFO(spi),
     PHP_SPI_VERSION,
     STANDARD_MODULE_PROPERTIES
@@ -321,39 +317,6 @@ PHP_MINIT_FUNCTION(spi)
     REGISTER_LONG_CONSTANT("SPI_MODE_3", SPI_CPOL|SPI_CPHA, CONST_PERSISTENT | CONST_CS);
     class_init_Spi();
 
-    /* add your stuff here */
-
-    return SUCCESS;
-}
-/* }}} */
-
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION */
-PHP_MSHUTDOWN_FUNCTION(spi)
-{
-
-    /* add your stuff here */
-
-    return SUCCESS;
-}
-/* }}} */
-
-
-/* {{{ PHP_RINIT_FUNCTION */
-PHP_RINIT_FUNCTION(spi)
-{
-    /* add your stuff here */
-
-    return SUCCESS;
-}
-/* }}} */
-
-
-/* {{{ PHP_RSHUTDOWN_FUNCTION */
-PHP_RSHUTDOWN_FUNCTION(spi)
-{
-    /* add your stuff here */
-
     return SUCCESS;
 }
 /* }}} */
@@ -365,7 +328,7 @@ PHP_MINFO_FUNCTION(spi)
     php_printf("A PHP extension for accessing SPI\n");
     php_info_print_table_start();
     php_info_print_table_row(2, "Version",PHP_SPI_VERSION " (alpha)");
-    php_info_print_table_row(2, "Released", "2012-08-20");
+    php_info_print_table_row(2, "Released", "2012-08-25");
     php_info_print_table_row(2, "CVS Revision", "$Id: $");
     php_info_print_table_row(2, "Authors", "Michael Davey 'frak.off@gmail.com' (lead)\n");
     php_info_print_table_end();
