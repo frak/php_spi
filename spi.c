@@ -128,7 +128,33 @@ PHP_METHOD(Spi, __construct)
     }
 
     // Now set the options
-    
+    int ret;
+    ret = ioctl(fd, SPI_IOC_WR_MODE, &mode);
+    if(ret == -1) {
+        php_error(E_ERROR, "Couldn't set SPI mode");
+    }
+    ret = ioctl(fd, SPI_IOC_RD_MODE, &mode);
+    if (ret == -1) {
+        php_error(E_ERROR, "Couldn't get SPI mode");
+    }
+
+    ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
+    if(ret == -1) {
+        php_error(E_ERROR, "Couldn't set bits per word");
+    }
+    ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
+    if (ret == -1) {
+        php_error(E_ERROR, "Couldn't get bits per word");
+    }
+
+    ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+    if (ret == -1) {
+       php_error(E_ERROR, "Couldn't set speed");
+    }
+    ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
+    if (ret == -1) {
+       php_error(E_ERROR, "Couldn't get speed");
+    }
 
     php_printf("Device: %s - Mode: %d, Bits: %d, Speed: %d, Delay: %d\n", device, mode, bits, speed, delay);
 }
