@@ -252,7 +252,7 @@ PHP_METHOD(Spi, transfer)
         .bits_per_word = bits
     };
 
-    int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &rt);
+    int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
     if(ret < 1) {
         php_error(E_WARNING, "Can't send SPI message");
     }
