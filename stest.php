@@ -4,11 +4,10 @@ ini_set('display_errors', 1);
 
 // $nonExistent = new Spi(5, 4, array());
 
-$spi = new Spi(0, 1, array(
-    'mode' => SPI_MODE_0,
-    'bits' => 4,
-    'speed' => 1000000,
-    'delay' => 1
+$spi = new Spi(0, 0, array(
+    'mode' => SPI_MODE_2,
+    'bits' => 8,
+    'speed' => 500000,
 ));
 var_dump($spi);
 
