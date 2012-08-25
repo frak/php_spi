@@ -12,11 +12,6 @@ $spi = new Spi(0, 1, array(
 ));
 
 $data = array(1, 2, 3, 4, 5, 6, 7, 8);
-$spi->write($data);
-
-$data = $spi->read();
-var_dump($data);
-
 $data = $spi->transfer($data);
 var_dump($data);
 
