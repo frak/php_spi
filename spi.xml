@@ -29,20 +29,18 @@
     </constants>
     <class name="Spi">
         <property name="device" access="private" type="long" value="-1" />
+        <property name="mode" access="private" type="long" value="0" />
+        <property name="bits" access="private" type="long" value="8" />
+        <property name="speed" access="private" type="long" value="1000000" />
+        <property name="delay" access="private" type="long" value="0" />
         <function access="public" name="__construct">
-            <proto>void __construct(int bus, int chipselect[, array options])</proto>
+            <proto>void __construct(int bus, int chipselect, array options)</proto>
         </function>
         <function access="public" name="__destruct">
             <proto>void __destruct()</proto>
         </function>
         <function access="public" name="transfer">
             <proto>array transfer(array data)</proto>
-        </function>
-        <function access="public" name="write">
-            <proto>int write(array data)</proto>
-        </function>
-        <function access="public" name="read">
-            <proto>array read(int length)</proto>
         </function>
     </class>
 </extension>

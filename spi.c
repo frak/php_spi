@@ -137,6 +137,7 @@ PHP_METHOD(Spi, __construct)
     if (ret == -1) {
         php_error(E_ERROR, "Couldn't get SPI mode");
     }
+    zend_update_property_long(_this_ce, _this_zval, "mode", 4, mode TSRMLS_DC);
 
     ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
     if(ret == -1) {
@@ -146,6 +147,7 @@ PHP_METHOD(Spi, __construct)
     if (ret == -1) {
         php_error(E_ERROR, "Couldn't get bits per word");
     }
+    zend_update_property_long(_this_ce, _this_zval, "bits", 4, bits TSRMLS_DC);
 
     ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
     if (ret == -1) {
@@ -155,6 +157,7 @@ PHP_METHOD(Spi, __construct)
     if (ret == -1) {
        php_error(E_ERROR, "Couldn't get speed");
     }
+    zend_update_property_long(_this_ce, _this_zval, "speed", 5, speed TSRMLS_DC);
 
     php_printf("Device: %s - Mode: %d, Bits: %d, Speed: %d, Delay: %d\n", device, mode, bits, speed, delay);
 }
@@ -213,7 +216,7 @@ PHP_METHOD(Spi, transfer)
     int count = zend_hash_num_elements(data_hash);
     php_printf("We were passed %d elements\n", count);
 
-    
+    uint8_t tx[count];
 
     zval **arr_value;
     for(zend_hash_internal_pointer_reset(data_hash);
@@ -222,7 +225,13 @@ PHP_METHOD(Spi, transfer)
 
 
     }
-//    int written = write(fd, buffer, count);
+
+    uint8_t rx[count] = {0, };
+    // struct spi_ioc_transfer tr {
+    //     .tx_buf = (unsigned long)tx,
+    //     .rx_buf = (unsigned long)rx,
+    // };
+    // int written = write(fd, buffer, count);
 
     array_init(return_value);
 }
@@ -249,6 +258,22 @@ static void class_init_Spi(void)
 
     zend_declare_property_long(Spi_ce_ptr,
         "device", 6, -1,
+        ZEND_ACC_PRIVATE TSRMLS_DC);
+
+    zend_declare_property_long(Spi_ce_ptr,
+        "mode", 6, 0,
+        ZEND_ACC_PRIVATE TSRMLS_DC);
+
+    zend_declare_property_long(Spi_ce_ptr,
+        "bits", 6, 8,
+        ZEND_ACC_PRIVATE TSRMLS_DC);
+
+    zend_declare_property_long(Spi_ce_ptr,
+        "speed", 6, 1000000,
+        ZEND_ACC_PRIVATE TSRMLS_DC);
+
+    zend_declare_property_long(Spi_ce_ptr,
+        "delay", 6, 0,
         ZEND_ACC_PRIVATE TSRMLS_DC);
 
     /* }}} Property registration */
