@@ -213,12 +213,15 @@ PHP_METHOD(Spi, transfer)
 
 
     int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
-    php_printf("The file descriptor is %d\n", fd);
+    uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
+    uint8_t bits = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "bits", 4, 0 TSRMLS_CC));
+    uint32_t speed = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "speed", 5, 0 TSRMLS_CC));
+    uint16_t delay = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "delay", 5, 0 TSRMLS_CC));
 
     int count = zend_hash_num_elements(data_hash);
     php_printf("We were passed %d elements\n", count);
 
-    uint8_t tx[count];
+    uint8_t *tx = emalloc(count);
 
     zval **arr_value;
     for(zend_hash_internal_pointer_reset(data_hash);
@@ -228,14 +231,26 @@ PHP_METHOD(Spi, transfer)
 
     }
 
-    uint8_t rx[count];
-    // struct spi_ioc_transfer tr {
-    //     .tx_buf = (unsigned long)tx,
-    //     .rx_buf = (unsigned long)rx,
-    // };
-    // int written = write(fd, buffer, count);
+    uint8_t *rx = emalloc(count);
+
+    struct spi_ioc_transfer tr {
+        .tx_buf = (unsigned long)tx,
+        .rx_buf = (unsigned long)rx,
+        .len = count,
+        .delay_usecs = delay,
+        .speed_hz = speed,
+        .bits_per_word = bits
+    };
+
+    int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &rt);
+    if(ret < 1) {
+        php_error(E_WARNING, "Can't send SPI message");
+    }
 
     array_init(return_value);
+
+    efree(tx);
+    efree(rx);
 }
 /* }}} transfer */
 
