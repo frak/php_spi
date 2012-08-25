@@ -7,8 +7,8 @@ ini_set('display_errors', 1);
 $spi = new Spi(0, 0, array(
     'mode' => SPI_MODE_0,
     'bits' => 8,
-    'speed' => 50000,
-    'delay' => 50
+    'speed' => 10000000,
+    'delay' => 0
 ));
 var_dump($spi);
 
