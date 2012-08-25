@@ -62,12 +62,14 @@ PHP_METHOD(Spi, __construct)
     char device[32];
     sprintf(device, "/dev/spidev%d.%d", bus, chipselect);
 
+    // If the device doesn't exists, error!
     if(access(device, F_OK) == -1) {
         char error[128];
         sprintf(error, "The device %s does not exist", device);
         php_error(E_ERROR, error);
     }
 
+    // If we can't open it, error!
     long fd = open(device, O_RDWR);
     if (fd < 0) {
         char error[128];
@@ -75,37 +77,86 @@ PHP_METHOD(Spi, __construct)
         php_error(E_ERROR, error);
     }
 
+    // Set the file descriptor as a class property
     zend_update_property_long(_this_ce, _this_zval, "device", 6, fd TSRMLS_DC);
 
-    uint8_t mode = 0;
+    // Default property values
+    uint8_t mode = SPI_MODE_0;
     uint8_t bits = 8;
     uint32_t speed = 500000;
     uint16_t delay = 0;
 
+    // Loop through the options array
     zval **data;
-    HashPosition pointer;
-    for(zend_hash_internal_pointer_reset_ex(options_hash, &pointer);
-        zend_hash_get_current_data_ex(options_hash, (void**) &data, &pointer) == SUCCESS;
-        zend_hash_move_forward_ex(options_hash, &pointer)) {
+    for(zend_hash_internal_pointer_reset(options_hash);
+        zend_hash_get_current_data(options_hash, (void **)&data) == SUCCESS;
+        zend_hash_move_forward(options_hash)) {
 
-        zval temp;
         char *key;
-        int key_len;
+        int len;
         long index;
+        long value = Z_LVAL_PP(data);
 
-//        if (zend_hash_get_current_key_ex(options_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
-//            if(strncmp("mode", key, key_len) == 0) {
-//                temp = **data;
-//                zval_copy_ctor(&temp);
-//                long l = Z_LVAL_PP(temp);
-//                char out[64];
-//                sprintf(out, "mode set to %d", mode);
-//                php_error(E_NOTICE, out);
-//        }
+        if(zend_hash_get_current_key_ex(options_hash, &key, &len, &index, 1, NULL) == HASH_KEY_IS_STRING) {
+            // Assign the value accordingly
+            if(strncmp("mode", key, len) == 0) {
+                switch(value) {
+                    case SPI_MODE_1:
+                        mode = SPI_MODE_1;
+                        break;
+                    case SPI_MODE_2:
+                        mode = SPI_MODE_2;
+                        break;
+                    case SPI_MODE_3:
+                        mode = SPI_MODE_3;
+                        break;
+                    default:
+                        mode = SPI_MODE_0;
+                        break;
+                }
+            }
+            else if(strncmp("bits", key, len) == 0) {
+                bits = value;
+            }
+            else if(strncmp("speed", key, len) == 0) {
+                speed = value;
+            }
+            else if(strncmp("delay", key, len) == 0) {
+                delay = value;
+            }
+        }
     }
 
+    // Now set the options
+    int ret;
+    ret = ioctl(fd, SPI_IOC_WR_MODE, &mode);
+    if(ret == -1) {
+        php_error(E_ERROR, "Couldn't set SPI mode");
+    }
+    ret = ioctl(fd, SPI_IOC_RD_MODE, &mode);
+    if (ret == -1) {
+        php_error(E_ERROR, "Couldn't get SPI mode");
+    }
 
-    php_error(E_NOTICE, device);
+    ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
+    if(ret == -1) {
+        php_error(E_ERROR, "Couldn't set bits per word");
+    }
+    ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
+    if (ret == -1) {
+        php_error(E_ERROR, "Couldn't get bits per word");
+    }
+
+    ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+    if (ret == -1) {
+       php_error(E_ERROR, "Couldn't set speed");
+    }
+    ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
+    if (ret == -1) {
+       php_error(E_ERROR, "Couldn't get speed");
+    }
+
+    php_printf("Device: %s - Mode: %d, Bits: %d, Speed: %d, Delay: %d\n", device, mode, bits, speed, delay);
 }
 /* }}} __construct */
 
