@@ -77,31 +77,14 @@ PHP_METHOD(Spi, __construct)
 
     zend_update_property_long(_this_ce, _this_zval, "device", 6, fd TSRMLS_DC);
 
-    uint8_t mode = 0;
+    uint8_t mode = SPI_MODE_0;
     uint8_t bits = 8;
     uint32_t speed = 500000;
     uint16_t delay = 0;
 
     zval **data;
-    HashPosition pointer;
-    for(zend_hash_internal_pointer_reset_ex(options_hash, &pointer);
-        zend_hash_get_current_data_ex(options_hash, (void**) &data, &pointer) == SUCCESS;
-        zend_hash_move_forward_ex(options_hash, &pointer)) {
-
-        zval temp;
-        char *key;
-        int key_len;
-        long index;
-
-//        if (zend_hash_get_current_key_ex(options_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
-//            if(strncmp("mode", key, key_len) == 0) {
-//                temp = **data;
-//                zval_copy_ctor(&temp);
-//                long l = Z_LVAL_PP(temp);
-//                char out[64];
-//                sprintf(out, "mode set to %d", mode);
-//                php_error(E_NOTICE, out);
-//        }
+    if(zend_hash_find(options_hash, "mode", 4, (void **)&data) == SUCCESS) {
+        php_printf("mode key was found");
     }
 
 
@@ -225,7 +208,7 @@ PHP_METHOD(Spi, read)
 
 static zend_function_entry Spi_methods[] = {
 	PHP_ME(Spi, __construct, Spi____construct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(Spi, __destruct, Spi____desstruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(Spi, __destruct, Spi____destruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
 	PHP_ME(Spi, transfer, Spi__transfer_args, /**/ZEND_ACC_PUBLIC)
 	PHP_ME(Spi, write, Spi__write_args, /**/ZEND_ACC_PUBLIC)
 	PHP_ME(Spi, read, Spi__read_args, /**/ZEND_ACC_PUBLIC)

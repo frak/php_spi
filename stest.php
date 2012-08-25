@@ -4,6 +4,6 @@ ini_set('display_errors', 1);
 
 // $nonExistent = new Spi(5, 4, array());
 
-$settings = new Spi(0, 1, array('mode' => 2));
+$settings = new Spi(0, 1, array('mode' => SPI_MODE_0));
 var_dump($settings);
 
