@@ -213,10 +213,7 @@ PHP_METHOD(Spi, transfer)
     int count = zend_hash_num_elements(data_hash);
     php_printf("We were passed %d elements\n", count);
 
-    void *buffer = (void *) emalloc(count);
-    if(buffer == NULL) {
-        php_error(E_ERROR, "Couldn't allocate memory");
-    }
+    
 
     zval **arr_value;
     for(zend_hash_internal_pointer_reset(data_hash);
@@ -225,8 +222,7 @@ PHP_METHOD(Spi, transfer)
 
 
     }
-    int written = write(fd, buffer, count);
-    efree(buffer);
+//    int written = write(fd, buffer, count);
 
     array_init(return_value);
 }
