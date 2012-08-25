@@ -17,19 +17,19 @@ TESTING
 
 You can now load the extension using a php.ini directive
 
-  extension="spi.so"
+    extension="spi.so"
 
 or load it at runtime using the dl() function
 
-  dl("spi.so");
+    dl("spi.so");
 
 The extension should now be available, you can test this
 using the extension_loaded() function:
 
-  if (extension_loaded("spi"))
-    echo "spi loaded :)";
-  else
-    echo "something is wrong :(";
+    if (extension_loaded("spi"))
+        echo "spi loaded :)";
+    else
+        echo "something is wrong :(";
 
 The extension will also add its own block to the output
 of phpinfo();
