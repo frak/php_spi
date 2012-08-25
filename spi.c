@@ -203,7 +203,6 @@ PHP_METHOD(Spi, transfer)
     HashTable * data_hash = NULL;
 
 
-
     if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/", &_this_zval, Spi_ce_ptr, &data) == FAILURE) {
         return;
     }
@@ -223,25 +222,20 @@ PHP_METHOD(Spi, transfer)
     int count = zend_hash_num_elements(data_hash);
     php_printf("We were passed %d elements\n", count);
 
-    uint8_t tx[] = {
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0x40, 0x00, 0x00, 0x00, 0x00, 0x95,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
-        0xF0, 0x0D,
-    };
+    unsigned char *tx;
+    unsigned char *rx;
+    tx = malloc(count);
+    rx = malloc(count);
 
     zval **arr_value;
     for(zend_hash_internal_pointer_reset(data_hash);
         zend_hash_get_current_data(data_hash, (void **)&arr_value) == SUCCESS;
         zend_hash_move_forward(data_hash)) {
 
-
+        int byte = (int)Z_LVAL_PP(arr_value);
+        *tx = byte;
+        ++tx;
     }
-
-    uint8_t rx[ARRAY_SIZE(tx)] = {0, };
 
     struct spi_ioc_transfer tr = {
         .tx_buf = (unsigned long)tx,
@@ -258,9 +252,12 @@ PHP_METHOD(Spi, transfer)
     }
 
     array_init(return_value);
+    int i;
+    for(i = 0; i < count; ++i) {
+        long value = rx[i];
+        add_next_index_long(return_value, value);
+    }
 
-    efree(tx);
-    efree(rx);
 }
 /* }}} transfer */
 
