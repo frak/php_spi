@@ -178,7 +178,7 @@ PHP_METHOD(Spi, write)
 
 
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/", &_this_zval, Spi_ce_ptr, &data) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "0a/", &_this_zval, Spi_ce_ptr, &data) == FAILURE) {
 		return;
 	}
 
@@ -186,11 +186,27 @@ PHP_METHOD(Spi, write)
 
 	data_hash = HASH_OF(data);
 
+    int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
+    php_printf("The file descriptor is %d\n", fd);
 
+    int count = zend_hash_num_elements(data_hash);
+    php_printf("We were passed %d elements\n", count);
 
-	php_error(E_WARNING, "write: not yet implemented"); RETURN_FALSE;
+    void *buffer = (void *) emalloc(count);
+    if(buffer == NULL) {
+        php_error(E_ERROR, "Couldn't allocate memory");
+    }
 
-	RETURN_LONG(0);
+    zval **arr_value;
+    for(zend_hash_internal_pointer_reset(data_hash);
+        zend_hash_get_current_data(data_hash, (void **)&arr_value) == SUCCESS;
+        zend_hash_move_forward(data_hash)) {
+
+        
+    }
+    int written = write(fd, buffer, count);
+    efree(buffer);
+	RETURN_LONG(written);
 }
 /* }}} write */
 

@@ -4,6 +4,5 @@ ini_set('display_errors', 1);
 
 // $nonExistent = new Spi(5, 4, array());
 
-$settings = new Spi(0, 1, array('mode' => 2));
-var_dump($settings);
-
+$class = new Spi(0, 1, array('mode' => SPI_MODE_0));
+$class->write(array(1, 2, 3, 4, 5, 6, 7, 8));
