@@ -159,6 +159,8 @@ PHP_METHOD(Spi, __construct)
     }
     zend_update_property_long(_this_ce, _this_zval, "speed", 5, speed TSRMLS_DC);
 
+    zend_update_property_long(_this_ce, _this_zval, "delay", 5, delay TSRMLS_DC);
+
     php_printf("Device: %s - Mode: %d, Bits: %d, Speed: %d, Delay: %d\n", device, mode, bits, speed, delay);
 }
 /* }}} __construct */
@@ -226,7 +228,7 @@ PHP_METHOD(Spi, transfer)
 
     }
 
-    uint8_t rx[count] = {0, };
+    uint8_t rx[count];
     // struct spi_ioc_transfer tr {
     //     .tx_buf = (unsigned long)tx,
     //     .rx_buf = (unsigned long)rx,
@@ -255,26 +257,6 @@ static void class_init_Spi(void)
     Spi_ce_ptr = zend_register_internal_class(&ce);
 
     /* {{{ Property registration */
-
-    zend_declare_property_long(Spi_ce_ptr,
-        "device", 6, -1,
-        ZEND_ACC_PRIVATE TSRMLS_DC);
-
-    zend_declare_property_long(Spi_ce_ptr,
-        "mode", 6, 0,
-        ZEND_ACC_PRIVATE TSRMLS_DC);
-
-    zend_declare_property_long(Spi_ce_ptr,
-        "bits", 6, 8,
-        ZEND_ACC_PRIVATE TSRMLS_DC);
-
-    zend_declare_property_long(Spi_ce_ptr,
-        "speed", 6, 1000000,
-        ZEND_ACC_PRIVATE TSRMLS_DC);
-
-    zend_declare_property_long(Spi_ce_ptr,
-        "delay", 6, 0,
-        ZEND_ACC_PRIVATE TSRMLS_DC);
 
     /* }}} Property registration */
 
