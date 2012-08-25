@@ -18,6 +18,8 @@
 
 #if HAVE_SPI
 
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -221,7 +223,15 @@ PHP_METHOD(Spi, transfer)
     int count = zend_hash_num_elements(data_hash);
     php_printf("We were passed %d elements\n", count);
 
-    uint8_t *tx = emalloc(count);
+    uint8_t tx[] = {
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0x40, 0x00, 0x00, 0x00, 0x00, 0x95,
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
+        0xF0, 0x0D,
+    };
 
     zval **arr_value;
     for(zend_hash_internal_pointer_reset(data_hash);
@@ -231,7 +241,7 @@ PHP_METHOD(Spi, transfer)
 
     }
 
-    uint8_t *rx = emalloc(count);
+    uint8_t rx[ARRAY_SIZE(tx)] = {0, };
 
     struct spi_ioc_transfer tr {
         .tx_buf = (unsigned long)tx,
