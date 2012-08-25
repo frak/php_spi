@@ -10,6 +10,7 @@ $spi = new Spi(0, 1, array(
     'speed' => 1000000,
     'delay' => 1
 ));
+var_dump($spi);
 
 $data = array(1, 2, 3, 4, 5, 6, 7, 8);
 $data = $spi->transfer($data);
