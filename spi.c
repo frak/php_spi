@@ -18,6 +18,15 @@
 
 #if HAVE_SPI
 
+#include <stdint.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/types.h>
+#include <linux/spi/spidev.h>
+
 /* {{{ Class definitions */
 
 /* {{{ Class Spi */
@@ -41,7 +50,7 @@ PHP_METHOD(Spi, __construct)
 
 
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|a/", &bus, &chipselect, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lla", &bus, &chipselect, &options) == FAILURE) {
 		return;
 	}
 
@@ -50,10 +59,53 @@ PHP_METHOD(Spi, __construct)
 
 	options_hash = HASH_OF(options);
 
+    char device[32];
+    sprintf(device, "/dev/spidev%d.%d", bus, chipselect);
+
+    if(access(device, F_OK) == -1) {
+        char error[128];
+        sprintf(error, "The device %s does not exist", device);
+        php_error(E_ERROR, error);
+    }
+
+    long fd = open(device, O_RDWR);
+    if (fd < 0) {
+        char error[128];
+        sprintf(error, "Could not open %s for read/write operations, are you running as root?", device);
+        php_error(E_ERROR, error);
+    }
+
+    zend_update_property_long(_this_ce, _this_zval, "device", 6, fd TSRMLS_DC);
+
+    uint8_t mode = 0;
+    uint8_t bits = 8;
+    uint32_t speed = 500000;
+    uint16_t delay = 0;
+
+    zval **data;
+    HashPosition pointer;
+    for(zend_hash_internal_pointer_reset_ex(options_hash, &pointer);
+        zend_hash_get_current_data_ex(options_hash, (void**) &data, &pointer) == SUCCESS;
+        zend_hash_move_forward_ex(options_hash, &pointer)) {
+
+        zval temp;
+        char *key;
+        int key_len;
+        long index;
+
+//        if (zend_hash_get_current_key_ex(options_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
+//            if(strncmp("mode", key, key_len) == 0) {
+//                temp = **data;
+//                zval_copy_ctor(&temp);
+//                long l = Z_LVAL_PP(temp);
+//                char out[64];
+//                sprintf(out, "mode set to %d", mode);
+//                php_error(E_NOTICE, out);
+//        }
+    }
 
 
-	php_error(E_WARNING, "__construct: not yet implemented"); RETURN_FALSE;
-
+    php_error(E_NOTICE, device);
 }
 /* }}} __construct */
 
@@ -75,9 +127,8 @@ PHP_METHOD(Spi, __destruct)
 
 	_this_ce = Z_OBJCE_P(_this_zval);
 
-
-	php_error(E_WARNING, "__destruct: not yet implemented"); RETURN_FALSE;
-
+    int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
+    close(fd);
 }
 /* }}} __destruct */
 
@@ -174,7 +225,7 @@ PHP_METHOD(Spi, read)
 
 static zend_function_entry Spi_methods[] = {
 	PHP_ME(Spi, __construct, Spi____construct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-	PHP_ME(Spi, __destruct, NULL, /**/ZEND_ACC_PUBLIC)
+    PHP_ME(Spi, __destruct, Spi____desstruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
 	PHP_ME(Spi, transfer, Spi__transfer_args, /**/ZEND_ACC_PUBLIC)
 	PHP_ME(Spi, write, Spi__write_args, /**/ZEND_ACC_PUBLIC)
 	PHP_ME(Spi, read, Spi__read_args, /**/ZEND_ACC_PUBLIC)
