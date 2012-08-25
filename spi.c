@@ -243,7 +243,7 @@ PHP_METHOD(Spi, transfer)
 
     uint8_t rx[ARRAY_SIZE(tx)] = {0, };
 
-    struct spi_ioc_transfer tr {
+    struct spi_ioc_transfer tr = {
         .tx_buf = (unsigned long)tx,
         .rx_buf = (unsigned long)rx,
         .len = count,
