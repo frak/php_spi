@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* $ Id: $ */ 
+/* $ Id: $ */
 
 #ifndef PHP_SPI_H
 #define PHP_SPI_H
@@ -36,7 +36,7 @@ extern "C" {
 #include <ext/standard/info.h>
 #include <Zend/zend_extensions.h>
 #ifdef  __cplusplus
-} // extern "C" 
+} // extern "C"
 #endif
 #ifdef  __cplusplus
 extern "C" {
@@ -111,30 +111,8 @@ ZEND_END_ARG_INFO()
 #define Spi__transfer_args NULL
 #endif
 
-PHP_METHOD(Spi, write);
-#if (PHP_MAJOR_VERSION >= 5)
-ZEND_BEGIN_ARG_INFO_EX(Spi__write_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-#if (PHP_MINOR_VERSION > 0)
-  ZEND_ARG_ARRAY_INFO(0, data, 1)
-#else
-  ZEND_ARG_INFO(0, data)
-#endif
-ZEND_END_ARG_INFO()
-#else /* PHP 4.x */
-#define Spi__write_args NULL
-#endif
-
-PHP_METHOD(Spi, read);
-#if (PHP_MAJOR_VERSION >= 5)
-ZEND_BEGIN_ARG_INFO_EX(Spi__read_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-  ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-#else /* PHP 4.x */
-#define Spi__read_args NULL
-#endif
-
 #ifdef  __cplusplus
-} // extern "C" 
+} // extern "C"
 #endif
 
 #endif /* PHP_HAVE_SPI */
