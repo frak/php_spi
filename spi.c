@@ -52,14 +52,12 @@ PHP_METHOD(Spi, __construct)
 
 
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lla", &bus, &chipselect, &options) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|a", &bus, &chipselect, &options) == FAILURE) {
         return;
     }
 
     _this_zval = getThis();
     _this_ce = Z_OBJCE_P(_this_zval);
-
-    options_hash = HASH_OF(options);
 
     char device[32];
     sprintf(device, "/dev/spidev%d.%d", bus, chipselect);
@@ -88,43 +86,47 @@ PHP_METHOD(Spi, __construct)
     uint32_t speed = 500000;
     uint16_t delay = 0;
 
-    // Loop through the options array
-    zval **data;
-    for(zend_hash_internal_pointer_reset(options_hash);
-        zend_hash_get_current_data(options_hash, (void **)&data) == SUCCESS;
-        zend_hash_move_forward(options_hash)) {
+    if(options != NULL) {
+        options_hash = HASH_OF(options);
 
-        char *key;
-        int len;
-        long index;
-        long value = Z_LVAL_PP(data);
+        // Loop through the options array
+        zval **data;
+        for(zend_hash_internal_pointer_reset(options_hash);
+            zend_hash_get_current_data(options_hash, (void **)&data) == SUCCESS;
+            zend_hash_move_forward(options_hash)) {
 
-        if(zend_hash_get_current_key_ex(options_hash, &key, &len, &index, 1, NULL) == HASH_KEY_IS_STRING) {
-            // Assign the value accordingly
-            if(strncmp("mode", key, len) == 0) {
-                switch(value) {
-                    case SPI_MODE_1:
-                        mode = SPI_MODE_1;
-                        break;
-                    case SPI_MODE_2:
-                        mode = SPI_MODE_2;
-                        break;
-                    case SPI_MODE_3:
-                        mode = SPI_MODE_3;
-                        break;
-                    default:
-                        mode = SPI_MODE_0;
-                        break;
+            char *key;
+            int len;
+            long index;
+            long value = Z_LVAL_PP(data);
+
+            if(zend_hash_get_current_key_ex(options_hash, &key, &len, &index, 1, NULL) == HASH_KEY_IS_STRING) {
+                // Assign the value accordingly
+                if(strncmp("mode", key, len) == 0) {
+                    switch(value) {
+                        case SPI_MODE_1:
+                            mode = SPI_MODE_1;
+                            break;
+                        case SPI_MODE_2:
+                            mode = SPI_MODE_2;
+                            break;
+                        case SPI_MODE_3:
+                            mode = SPI_MODE_3;
+                            break;
+                        default:
+                            mode = SPI_MODE_0;
+                            break;
+                    }
                 }
-            }
-            else if(strncmp("bits", key, len) == 0) {
-                bits = value;
-            }
-            else if(strncmp("speed", key, len) == 0) {
-                speed = value;
-            }
-            else if(strncmp("delay", key, len) == 0) {
-                delay = value;
+                else if(strncmp("bits", key, len) == 0) {
+                    bits = value;
+                }
+                else if(strncmp("speed", key, len) == 0) {
+                    speed = value;
+                }
+                else if(strncmp("delay", key, len) == 0) {
+                    delay = value;
+                }
             }
         }
     }

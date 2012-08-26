@@ -2,7 +2,8 @@
 error_reporting(-1);
 ini_set('display_errors', 1);
 
-// $nonExistent = new Spi(5, 4, array());
+$noParams = new Spi(0, 1);
+var_dump($noParams);
 
 $spi = new Spi(0, 0, array(
     'mode' => SPI_MODE_0,
