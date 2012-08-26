@@ -36,6 +36,15 @@ of phpinfo();
 
 USAGE
 =====
+You may find that by default that you need to run any SPI scripts as root,
+to fix this you can either:
+
+    sudo chmod 666 /dev/spidev*
+
+Or alternatively you can create /etc/udev/rules.d/spidev.rules with the
+following line in it:
+
+    KERNEL="spidev[0-9]*", MODE="0666"
 
 To access an SPI interface, you need to instantiate an Spi object:
 
