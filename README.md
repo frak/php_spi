@@ -47,8 +47,20 @@ To access an SPI interface, you need to instantiate an Spi object:
      * "bits": How many bits per word
      * "speed": The bus speed in Hz
      * "delay": Delay between bit sending
+     *
+     * The default values are shown in this example
      */
-    $spi = new Spi(0, 0, array('speed' => 1000000));
+    $spi = new Spi(0, 0, array(
+        'mode'  => SPI_MODE_0,
+        'bits'  => 8,
+        'speed' => 1000000,
+        'delay' => 0
+    ));
+
+However, if you are OK with the default values, all you need to do is supply the
+bus and chipselect parameters:
+
+    $spi = new Spi(0, 1);
 
 Once you are connected to the SPI device, you can then transfer data as follows:
 
