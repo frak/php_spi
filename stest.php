@@ -3,15 +3,12 @@ error_reporting(-1);
 ini_set('display_errors', 1);
 
 $noParams = new Spi(0, 1);
-var_dump($noParams);
 
 $spi = new Spi(0, 0, array(
-    'mode' => SPI_MODE_0,
-    'bits' => 8,
+    'mode' => SPI_MODE_1,
     'speed' => 10000000,
-    'delay' => 0
+    'delay' => 5
 ));
-var_dump($spi);
 
 $data = array(
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
