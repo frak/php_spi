@@ -42,7 +42,7 @@ to fix this you can either:
     sudo chmod 666 /dev/spidev*
 
 Or alternatively you can create /etc/udev/rules.d/spidev.rules with the
-following line in it:
+following line in it to have them created with the correct permissions on boot:
 
     KERNEL="spidev[0-9]*", MODE="0666"
 
