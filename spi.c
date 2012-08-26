@@ -331,7 +331,6 @@ PHP_MINFO_FUNCTION(spi)
     php_info_print_table_start();
     php_info_print_table_row(2, "Version",PHP_SPI_VERSION " (alpha)");
     php_info_print_table_row(2, "Released", "2012-08-25");
-    php_info_print_table_row(2, "CVS Revision", "$Id: $");
     php_info_print_table_row(2, "Authors", "Michael Davey 'frak.off@gmail.com' (lead)\n");
     php_info_print_table_end();
     /* add your stuff here */
