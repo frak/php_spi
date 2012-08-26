@@ -79,6 +79,7 @@ PHP_METHOD(Spi, __construct)
 
     // Set the file descriptor as a class property
     zend_update_property_long(_this_ce, _this_zval, "device", 6, fd TSRMLS_DC);
+    zend_update_property_string(_this_ce, _this_zval, "device_name", 11, device TSRMLS_DC);
 
     // Default property values
     uint8_t mode = SPI_MODE_0;
@@ -276,6 +277,7 @@ PHP_METHOD(Spi, getInfo)
     _this_ce = Z_OBJCE_P(_this_zval);
 
     int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
+    char *device = Z_STRVAL_P(zend_read_property(_this_ce, _this_zval, "device_name", 11, 0 TSRMLS_CC));
     uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
     uint8_t bits = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "bits", 4, 0 TSRMLS_CC));
     uint32_t speed = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "speed", 5, 0 TSRMLS_CC));
@@ -283,6 +285,7 @@ PHP_METHOD(Spi, getInfo)
 
     array_init(return_value);
     add_assoc_long(return_value, "descriptor", fd);
+    add_assoc_string(return_value, "device", device, 1);
     add_assoc_long(return_value, "spi_mode", mode);
     add_assoc_long(return_value, "bits_per_word", bits);
     add_assoc_long(return_value, "speed_hz", speed);
