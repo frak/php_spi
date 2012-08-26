@@ -275,10 +275,18 @@ PHP_METHOD(Spi, getInfo)
 
     _this_ce = Z_OBJCE_P(_this_zval);
 
+    int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
+    uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
+    uint8_t bits = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "bits", 4, 0 TSRMLS_CC));
+    uint32_t speed = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "speed", 5, 0 TSRMLS_CC));
+    uint16_t delay = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "delay", 5, 0 TSRMLS_CC));
 
-    php_error(E_WARNING, "getInfo: not yet implemented"); RETURN_FALSE;
-
-    RETURN_LONG(0);
+    array_init(return_value);
+    add_assoc_long(return_value, "descriptor", fd);
+    add_assoc_long(return_value, "spi_mode", mode);
+    add_assoc_long(return_value, "bits_per_word", bits);
+    add_assoc_long(return_value, "speed_hz", speed);
+    add_assoc_long(return_value, "delay_usec", delay);
 }
 /* }}} getInfo */
 
