@@ -262,7 +262,7 @@ PHP_METHOD(Spi, transfer)
 
 static zend_function_entry Spi_methods[] = {
     PHP_ME(Spi, __construct, Spi____construct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(Spi, __destruct, Spi____destruct_args, /**/ZEND_ACC_DTOR)
+    PHP_ME(Spi, __destruct, Spi____destruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
     PHP_ME(Spi, transfer, Spi__transfer_args, /**/ZEND_ACC_PUBLIC)
     { NULL, NULL, NULL }
 };
