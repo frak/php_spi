@@ -259,11 +259,35 @@ PHP_METHOD(Spi, transfer)
 }
 /* }}} transfer */
 
+/* {{{ proto array getInfo(void)
+   */
+PHP_METHOD(Spi, getInfo)
+{
+    zend_class_entry * _this_ce;
+
+    zval * _this_zval = NULL;
+
+
+
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Spi_ce_ptr) == FAILURE) {
+        return;
+    }
+
+    _this_ce = Z_OBJCE_P(_this_zval);
+
+
+    php_error(E_WARNING, "getInfo: not yet implemented"); RETURN_FALSE;
+
+    RETURN_LONG(0);
+}
+/* }}} getInfo */
+
 
 static zend_function_entry Spi_methods[] = {
     PHP_ME(Spi, __construct, Spi____construct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
     PHP_ME(Spi, __destruct, Spi____destruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
     PHP_ME(Spi, transfer, Spi__transfer_args, /**/ZEND_ACC_PUBLIC)
+    PHP_ME(Spi, getInfo, Spi__getInfo_args, /**/ZEND_ACC_PUBLIC)
     { NULL, NULL, NULL }
 };
 

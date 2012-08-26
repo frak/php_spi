@@ -111,6 +111,15 @@ ZEND_END_ARG_INFO()
 #define Spi__transfer_args NULL
 #endif
 
+PHP_METHOD(Spi, getInfo);
+#if (PHP_MAJOR_VERSION >= 5)
+ZEND_BEGIN_ARG_INFO_EX(Spi__getInfo_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+  ZEND_ARG_INFO(0, )
+ZEND_END_ARG_INFO()
+#else /* PHP 4.x */
+#define Spi__getInfo_args NULL
+#endif
+
 #ifdef  __cplusplus
 } // extern "C"
 #endif
