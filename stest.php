@@ -18,6 +18,9 @@ foreach($info as $key => $value) {
 $data = array(
     0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
 );
-$data = $spi->transfer($data);
+$read = $spi->transfer($data);
 
-var_dump($data);
+if($read == $data) {
+    // MOSI connected to MISO
+    var_dump($read);
+}
