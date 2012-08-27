@@ -50,8 +50,6 @@ PHP_METHOD(Spi, __construct)
     zval * options = NULL;
     HashTable * options_hash = NULL;
 
-
-
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|a", &bus, &chipselect, &options) == FAILURE) {
         return;
     }
@@ -180,8 +178,6 @@ PHP_METHOD(Spi, __destruct)
 
     zval * _this_zval = NULL;
 
-
-
     if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Spi_ce_ptr) == FAILURE) {
         return;
     }
@@ -205,7 +201,6 @@ PHP_METHOD(Spi, transfer)
     zval * data = NULL;
     HashTable * data_hash = NULL;
 
-
     if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/", &_this_zval, Spi_ce_ptr, &data) == FAILURE) {
         return;
     }
@@ -213,8 +208,6 @@ PHP_METHOD(Spi, transfer)
     _this_ce = Z_OBJCE_P(_this_zval);
 
     data_hash = HASH_OF(data);
-
-
 
     int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
     uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
@@ -268,8 +261,6 @@ PHP_METHOD(Spi, getInfo)
 
     zval * _this_zval = NULL;
 
-
-
     if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Spi_ce_ptr) == FAILURE) {
         return;
     }
@@ -292,6 +283,25 @@ PHP_METHOD(Spi, getInfo)
     add_assoc_long(return_value, "delay_usec", delay);
 }
 /* }}} getInfo */
+
+/* {{{ proto array usecDelay(int delay)
+   */
+PHP_METHOD(Spi, usecDelay)
+{
+    zend_class_entry * _this_ce;
+
+    zval * _this_zval = NULL;
+
+    long delay
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &delay) == FAILURE) {
+        return;
+    }
+
+    php_error(E_WARNING,  "usecDelay not implemented");
+
+}
+/* }}} usecDelay */
 
 
 static zend_function_entry Spi_methods[] = {
