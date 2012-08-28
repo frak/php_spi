@@ -236,6 +236,70 @@ PHP_METHOD(Spi, transfer)
         tx[i++] = byte;
     }
 
+    tx = spi_send(tx);
+
+    array_init(return_value);
+    for(i = 0; i < count; ++i) {
+        int value = tx[i];
+        add_next_index_long(return_value, value);
+    }
+
+}
+/* }}} transfer */
+
+/* {{{ proto array blockTransfer(array data, int colDelay)
+   */
+PHP_METHOD(Spi, blockTransfer)
+{
+    zend_class_entry * _this_ce;
+
+    zval * _this_zval = NULL;
+    zval * data = NULL;
+    HashTable * data_hash = NULL;
+    long colDelay = 0;
+
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oal/", &_this_zval, Spi_ce_ptr, &data, &colDelay) == FAILURE) {
+        return;
+    }
+
+    _this_ce = Z_OBJCE_P(_this_zval);
+
+    data_hash = HASH_OF(data);
+
+    int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
+    uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
+    uint8_t bits = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "bits", 4, 0 TSRMLS_CC));
+    uint32_t speed = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "speed", 5, 0 TSRMLS_CC));
+    uint16_t delay = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "delay", 5, 0 TSRMLS_CC));
+
+    int count = zend_hash_num_elements(data_hash);
+
+    unsigned char *tx;
+    tx = emalloc(count);
+
+    int i = 0;
+    zval **arr_value;
+    for(zend_hash_internal_pointer_reset(data_hash);
+        zend_hash_get_current_data(data_hash, (void **)&arr_value) == SUCCESS;
+        zend_hash_move_forward(data_hash)) {
+
+        int byte = (int)Z_LVAL_PP(arr_value);
+        tx[i++] = byte;
+    }
+
+    tx = spi_send(tx);
+
+    array_init(return_value);
+    for(i = 0; i < count; ++i) {
+        int value = tx[i];
+        add_next_index_long(return_value, value);
+    }
+
+}
+/* }}} blockTransfer */
+
+unsigned char* function spi_send(unsigned char* tx)
+{
     struct spi_ioc_transfer tr = {
         .tx_buf = (unsigned long)tx,
         .rx_buf = (unsigned long)tx, // thanks to gordonDrogon for this tip
@@ -249,15 +313,8 @@ PHP_METHOD(Spi, transfer)
     if(ret < 1) {
         php_error(E_WARNING, "Can't send SPI message");
     }
-
-    array_init(return_value);
-    for(i = 0; i < count; ++i) {
-        int value = tx[i];
-        add_next_index_long(return_value, value);
-    }
-
+    return tx;
 }
-/* }}} transfer */
 
 /* {{{ proto array getInfo(void)
    */
@@ -346,6 +403,15 @@ PHP_METHOD(Spi, setupTimer)
 }
 /* }}} setupTimer */
 
+void free_timer_delay(long delay)
+{
+    unsigned count_at_start, current_count;
+    count_at_start =  *(timer+(0x420>>2)); // the value of free running counter
+    current_count = count_at_start;
+    while((current_count - count_at_start) < (unsigned)delay) {
+        current_count = *(timer + (0x420 >> 2));
+    }
+}
 
 /* {{{ proto array usecDelay(int delay)
    */
@@ -361,13 +427,7 @@ PHP_METHOD(Spi, usecDelay)
         return;
     }
 
-    unsigned count_at_start, current_count;
-    count_at_start =  *(timer+(0x420>>2)); // the value of free running counter
-    current_count = count_at_start;
-    while((current_count - count_at_start) < (unsigned)delay) {
-        current_count = *(timer + (0x420 >> 2));
-    }
-
+    free_timer_delay(delay);
 }
 /* }}} usecDelay */
 
