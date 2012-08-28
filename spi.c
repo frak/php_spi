@@ -427,8 +427,6 @@ PHP_MINIT_FUNCTION(spi)
     REGISTER_LONG_CONSTANT("SPI_MODE_3", SPI_CPOL|SPI_CPHA, CONST_PERSISTENT | CONST_CS);
     class_init_Spi();
 
-    setup_timer_file();
-
     return SUCCESS;
 }
 /* }}} */
