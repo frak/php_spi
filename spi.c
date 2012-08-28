@@ -377,6 +377,7 @@ static zend_function_entry Spi_methods[] = {
     PHP_ME(Spi, __destruct, Spi____destruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
     PHP_ME(Spi, transfer, Spi__transfer_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, getInfo, Spi__getInfo_args, /**/ZEND_ACC_PUBLIC)
+    PHP_ME(Spi, setupTimer, Spi__setupTimer_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, usecDelay, Spi__usecDelay_args, /**/ZEND_ACC_PUBLIC)
     { NULL, NULL, NULL }
 };
