@@ -307,7 +307,7 @@ PHP_METHOD(Spi, setupTimer)
 
     /* open /dev/mem */
     if ((mem_tmr = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
-        php_error(E_ERROR, "Can't open /dev/mem\n");
+        php_error(E_WARNING, "Can't open /dev/mem - are you running as root?\n");
         RETURN_FALSE;
     }
 
