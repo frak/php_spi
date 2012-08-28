@@ -33,10 +33,7 @@
 
 #define BCM2708_PERI_BASE        0x20000000
 #define TIMER_BASE               (BCM2708_PERI_BASE + 0x00B000)
-
 volatile unsigned *timer;
-char *timer_mem, *timer_map;
-int mem_fd, mem_tmr;
 
 /* {{{ Class definitions */
 
@@ -304,6 +301,9 @@ PHP_METHOD(Spi, setupTimer)
     }
 
     _this_ce = Z_OBJCE_P(_this_zval);
+
+    char *timer_mem, *timer_map;
+    int mem_fd, mem_tmr;
 
     /* open /dev/mem */
     if ((mem_tmr = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
