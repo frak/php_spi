@@ -19,15 +19,20 @@
 #if HAVE_SPI
 
 #define PAGE_SIZE (4*1024)
+#define BLOCK_SIZE (4*1024)
 
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
+
+#define BCM2708_PERI_BASE        0x20000000
+#define TIMER_BASE               (BCM2708_PERI_BASE + 0x00B000)
 
 volatile unsigned *timer;
 char *timer_mem, *timer_map;
@@ -271,7 +276,6 @@ PHP_METHOD(Spi, getInfo)
 
     _this_ce = Z_OBJCE_P(_this_zval);
 
-    int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
     char *device = Z_STRVAL_P(zend_read_property(_this_ce, _this_zval, "device_name", 11, 0 TSRMLS_CC));
     uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
     uint8_t bits = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "bits", 4, 0 TSRMLS_CC));
@@ -279,7 +283,6 @@ PHP_METHOD(Spi, getInfo)
     uint16_t delay = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "delay", 5, 0 TSRMLS_CC));
 
     array_init(return_value);
-    add_assoc_long(return_value, "descriptor", fd);
     add_assoc_string(return_value, "device", device, 1);
     add_assoc_long(return_value, "spi_mode", mode);
     add_assoc_long(return_value, "bits_per_word", bits);
@@ -330,11 +333,6 @@ static void class_init_Spi(void)
 
     INIT_CLASS_ENTRY(ce, "Spi", Spi_methods);
     Spi_ce_ptr = zend_register_internal_class(&ce);
-
-    /* {{{ Property registration */
-
-    /* }}} Property registration */
-
 }
 
 /* }}} Class Spi */
@@ -367,41 +365,38 @@ ZEND_GET_MODULE(spi)
 /* {{{ Access to the ARM timer
    */
 void setup_timer_file(){
-   /* open /dev/mem */
-   if ((mem_tmr = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
-      printf("can't open /dev/mem \n");
-      exit (-1);
-   }
+    /* open /dev/mem */
+    if ((mem_tmr = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
+        php_error(E_ERROR, "Can't open /dev/mem\n");
+    }
 
-   /* mmap TIMER */
+    /* mmap TIMER */
 
-   // Allocate MAP block
-   if ((timer_mem = emalloc(BLOCK_SIZE + (PAGE_SIZE-1))) == NULL) {
-      printf("allocation error \n");
-      exit (-1);
-   }
+    // Allocate MAP block
+    if ((timer_mem = emalloc(BLOCK_SIZE + (PAGE_SIZE-1))) == NULL) {
+        php_error(E_ERROR, "Allocation error\n");
+    }
 
-   // Make sure pointer is on 4K boundary
-   if ((unsigned long)timer_mem % PAGE_SIZE)
-     timer_mem += PAGE_SIZE - ((unsigned long)timer_mem % PAGE_SIZE);
+    // Make sure pointer is on 4K boundary
+    if ((unsigned long)timer_mem % PAGE_SIZE)
+    timer_mem += PAGE_SIZE - ((unsigned long)timer_mem % PAGE_SIZE);
 
-   // Now map it
-   timer_map = ( char *)mmap(
-      (caddr_t)timer_mem,
-      BLOCK_SIZE,
-      PROT_READ|PROT_WRITE,
-      MAP_SHARED|MAP_FIXED,
-      mem_tmr,
-      TIMER_BASE
-   );
+    // Now map it
+    timer_map = (char *)mmap(
+        (caddr_t)timer_mem,
+        BLOCK_SIZE,
+        PROT_READ|PROT_WRITE,
+        MAP_SHARED|MAP_FIXED,
+        mem_tmr,
+        TIMER_BASE
+    );
 
-   if ((long)timer_map < 0) {
-      printf("mmap error timer %d\n", (int)timer_map);
-      exit (-1);
-   }
+    if ((long)timer_map < 0) {
+        php_error(E_ERROR, "mmap error timer %d\n", (int)timer_map);
+    }
 
-   // Always use volatile pointer!
-   timer = (volatile unsigned *)timer_map;
+    // Always use volatile pointer!
+    timer = (volatile unsigned *)timer_map;
 }
 /* }}} setup_timer_file */
 
@@ -431,10 +426,8 @@ PHP_MINFO_FUNCTION(spi)
     php_info_print_table_start();
     php_info_print_table_row(2, "Version",PHP_SPI_VERSION " (alpha)");
     php_info_print_table_row(2, "Released", "2012-08-25");
-    php_info_print_table_row(2, "Authors", "Michael Davey 'frak.off@gmail.com' (lead)\n");
+    php_info_print_table_row(2, "Authors", "Michael Davey 'frak.off@gmail.com'\n");
     php_info_print_table_end();
-    /* add your stuff here */
-
 }
 /* }}} */
 
