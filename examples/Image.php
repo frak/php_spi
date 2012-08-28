@@ -1,6 +1,6 @@
 <?php
 
-class SpiImage
+class Image
 {
     const HEIGHT = 32;
 
