@@ -50,8 +50,6 @@ PHP_METHOD(Spi, __construct)
     zval * options = NULL;
     HashTable * options_hash = NULL;
 
-
-
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|a", &bus, &chipselect, &options) == FAILURE) {
         return;
     }
@@ -180,8 +178,6 @@ PHP_METHOD(Spi, __destruct)
 
     zval * _this_zval = NULL;
 
-
-
     if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Spi_ce_ptr) == FAILURE) {
         return;
     }
@@ -205,7 +201,6 @@ PHP_METHOD(Spi, transfer)
     zval * data = NULL;
     HashTable * data_hash = NULL;
 
-
     if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/", &_this_zval, Spi_ce_ptr, &data) == FAILURE) {
         return;
     }
@@ -213,8 +208,6 @@ PHP_METHOD(Spi, transfer)
     _this_ce = Z_OBJCE_P(_this_zval);
 
     data_hash = HASH_OF(data);
-
-
 
     int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
     uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
@@ -268,15 +261,12 @@ PHP_METHOD(Spi, getInfo)
 
     zval * _this_zval = NULL;
 
-
-
     if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Spi_ce_ptr) == FAILURE) {
         return;
     }
 
     _this_ce = Z_OBJCE_P(_this_zval);
 
-    int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
     char *device = Z_STRVAL_P(zend_read_property(_this_ce, _this_zval, "device_name", 11, 0 TSRMLS_CC));
     uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
     uint8_t bits = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "bits", 4, 0 TSRMLS_CC));
@@ -284,7 +274,6 @@ PHP_METHOD(Spi, getInfo)
     uint16_t delay = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "delay", 5, 0 TSRMLS_CC));
 
     array_init(return_value);
-    add_assoc_long(return_value, "descriptor", fd);
     add_assoc_string(return_value, "device", device, 1);
     add_assoc_long(return_value, "spi_mode", mode);
     add_assoc_long(return_value, "bits_per_word", bits);
@@ -310,11 +299,6 @@ static void class_init_Spi(void)
 
     INIT_CLASS_ENTRY(ce, "Spi", Spi_methods);
     Spi_ce_ptr = zend_register_internal_class(&ce);
-
-    /* {{{ Property registration */
-
-    /* }}} Property registration */
-
 }
 
 /* }}} Class Spi */
@@ -366,10 +350,8 @@ PHP_MINFO_FUNCTION(spi)
     php_info_print_table_start();
     php_info_print_table_row(2, "Version",PHP_SPI_VERSION " (alpha)");
     php_info_print_table_row(2, "Released", "2012-08-25");
-    php_info_print_table_row(2, "Authors", "Michael Davey 'frak.off@gmail.com' (lead)\n");
+    php_info_print_table_row(2, "Authors", "Michael Davey 'frak.off@gmail.com'\n");
     php_info_print_table_end();
-    /* add your stuff here */
-
 }
 /* }}} */
 
