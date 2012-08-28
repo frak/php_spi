@@ -328,7 +328,7 @@ PHP_METHOD(Spi, blockTransfer)
         int ret;
         struct timespec sleeper, dummy;
         sleeper.tv_sec  = 0;
-        sleeper.tv_nsec = 1000;
+        sleeper.tv_nsec = 1000000;
 
         for(i = 0; i < row_count; ++i) {
             tx = buffer + (i * column_count);
@@ -346,15 +346,16 @@ PHP_METHOD(Spi, blockTransfer)
             if(ret < 1) {
                 php_error(E_WARNING, "Can't send SPI message");
             }
-            nanosleep (&sleeper, &dummy);
+            nanosleep(&sleeper, &dummy);
         }
+        RETURN_TRUE;
+    } else {
+        // array_init(return_value);
+        // for(i = 0; i < count; ++i) {
+        //     int value = tx[i];
+        //     add_next_index_long(return_value, value);
+        // }
     }
-
-    // array_init(return_value);
-    // for(i = 0; i < count; ++i) {
-    //     int value = tx[i];
-    //     add_next_index_long(return_value, value);
-    // }
 
 }
 /* }}} blockTransfer */
