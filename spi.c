@@ -18,16 +18,22 @@
 
 #if HAVE_SPI
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define PAGE_SIZE (4*1024)
+#define BLOCK_SIZE (4*1024)
 
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
+
+#define BCM2708_PERI_BASE        0x20000000
+#define TIMER_BASE               (BCM2708_PERI_BASE + 0x00B000)
+volatile unsigned *timer;
 
 /* {{{ Class definitions */
 
@@ -218,7 +224,7 @@ PHP_METHOD(Spi, transfer)
     int count = zend_hash_num_elements(data_hash);
 
     unsigned char *tx;
-    tx = malloc(count);
+    tx = emalloc(count);
 
     int i = 0;
     zval **arr_value;
@@ -282,12 +288,97 @@ PHP_METHOD(Spi, getInfo)
 }
 /* }}} getInfo */
 
+/* {{{ proto bool setupTimer(void)
+   */
+PHP_METHOD(Spi, setupTimer)
+{
+    zend_class_entry * _this_ce;
+
+    zval * _this_zval = NULL;
+
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Spi_ce_ptr) == FAILURE) {
+        return;
+    }
+
+    _this_ce = Z_OBJCE_P(_this_zval);
+
+    char *timer_mem, *timer_map;
+    int mem_fd, mem_tmr;
+
+    /* open /dev/mem */
+    if ((mem_tmr = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
+        php_error(E_ERROR, "Can't open /dev/mem\n");
+        RETURN_FALSE;
+    }
+
+    /* mmap TIMER */
+
+    // Allocate MAP block
+    if ((timer_mem = emalloc(BLOCK_SIZE + (PAGE_SIZE-1))) == NULL) {
+        php_error(E_ERROR, "Allocation error\n");
+        RETURN_FALSE;
+    }
+
+    // Make sure pointer is on 4K boundary
+    if ((unsigned long)timer_mem % PAGE_SIZE)
+    timer_mem += PAGE_SIZE - ((unsigned long)timer_mem % PAGE_SIZE);
+
+    // Now map it
+    timer_map = (char *)mmap(
+        (caddr_t)timer_mem,
+        BLOCK_SIZE,
+        PROT_READ|PROT_WRITE,
+        MAP_SHARED|MAP_FIXED,
+        mem_tmr,
+        TIMER_BASE
+    );
+
+    if ((long)timer_map < 0) {
+        php_error(E_ERROR, "mmap error timer %d\n", (int)timer_map);
+        RETURN_FALSE;
+    }
+
+    // Always use volatile pointer!
+    timer = (volatile unsigned *)timer_map;
+    *(timer + (0x408 >> 2)) = 0xF90200;
+
+    RETURN_TRUE;
+}
+/* }}} setupTimer */
+
+
+/* {{{ proto array usecDelay(int delay)
+   */
+PHP_METHOD(Spi, usecDelay)
+{
+    zend_class_entry * _this_ce;
+
+    zval * _this_zval = NULL;
+
+    long delay;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &delay) == FAILURE) {
+        return;
+    }
+
+    unsigned count_at_start, current_count;
+    count_at_start =  *(timer+(0x420>>2)); // the value of free running counter
+    current_count = count_at_start;
+    while((current_count - count_at_start) < (unsigned)delay) {
+        current_count = *(timer + (0x420 >> 2));
+    }
+
+}
+/* }}} usecDelay */
+
 
 static zend_function_entry Spi_methods[] = {
     PHP_ME(Spi, __construct, Spi____construct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
     PHP_ME(Spi, __destruct, Spi____destruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
     PHP_ME(Spi, transfer, Spi__transfer_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, getInfo, Spi__getInfo_args, /**/ZEND_ACC_PUBLIC)
+    PHP_ME(Spi, setupTimer, Spi__setupTimer_args, /**/ZEND_ACC_PUBLIC)
+    PHP_ME(Spi, usecDelay, Spi__usecDelay_args, /**/ZEND_ACC_PUBLIC)
     { NULL, NULL, NULL }
 };
 
@@ -325,7 +416,6 @@ zend_module_entry spi_module_entry = {
 #ifdef COMPILE_DL_SPI
 ZEND_GET_MODULE(spi)
 #endif
-
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(spi)

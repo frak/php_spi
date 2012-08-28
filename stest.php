@@ -24,3 +24,19 @@ if($read == $data) {
     // MOSI connected to MISO
     var_dump($read);
 }
+
+if($spi->setupTimer()) {
+    $times = array();
+    $times[0] = microtime(true);
+    $spi->usecDelay(1000000);
+    $times[1] =  microtime(true);
+    usleep(1000000);
+    $times[2] = microtime(true);
+
+    foreach($times as $time) {
+        echo "Time: {$time}\n";
+    }
+} else {
+    echo "You need to run as root to test the timer\n";
+}
+
