@@ -120,6 +120,7 @@ ZEND_BEGIN_ARG_INFO_EX(Spi__blockTransfer_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VA
   ZEND_ARG_INFO(0, data)
 #endif
   ZEND_ARG_INFO(0, colDelay)
+  ZEND_ARG_INFO(0, discard)
 ZEND_END_ARG_INFO()
 #else /* PHP 4.x */
 #define Spi__blockTransfer_args NULL
