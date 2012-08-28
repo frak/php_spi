@@ -291,7 +291,7 @@ PHP_METHOD(Spi, getInfo)
 }
 /* }}} getInfo */
 
-/* {{{ proto array setupTimer(int delay)
+/* {{{ proto bool setupTimer(void)
    */
 PHP_METHOD(Spi, setupTimer)
 {
@@ -308,6 +308,7 @@ PHP_METHOD(Spi, setupTimer)
     /* open /dev/mem */
     if ((mem_tmr = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
         php_error(E_ERROR, "Can't open /dev/mem\n");
+        RETURN_FALSE;
     }
 
     /* mmap TIMER */
@@ -315,6 +316,7 @@ PHP_METHOD(Spi, setupTimer)
     // Allocate MAP block
     if ((timer_mem = emalloc(BLOCK_SIZE + (PAGE_SIZE-1))) == NULL) {
         php_error(E_ERROR, "Allocation error\n");
+        RETURN_FALSE;
     }
 
     // Make sure pointer is on 4K boundary
@@ -333,11 +335,14 @@ PHP_METHOD(Spi, setupTimer)
 
     if ((long)timer_map < 0) {
         php_error(E_ERROR, "mmap error timer %d\n", (int)timer_map);
+        RETURN_FALSE;
     }
 
     // Always use volatile pointer!
     timer = (volatile unsigned *)timer_map;
     *(timer + (0x408 >> 2)) = 0xF90200;
+
+    RETURN_TRUE;
 }
 /* }}} setupTimer */
 
