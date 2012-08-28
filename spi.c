@@ -291,6 +291,57 @@ PHP_METHOD(Spi, getInfo)
 }
 /* }}} getInfo */
 
+/* {{{ proto array setupTimer(int delay)
+   */
+PHP_METHOD(Spi, setupTimer)
+{
+    zend_class_entry * _this_ce;
+
+    zval * _this_zval = NULL;
+
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Spi_ce_ptr) == FAILURE) {
+        return;
+    }
+
+    _this_ce = Z_OBJCE_P(_this_zval);
+
+    /* open /dev/mem */
+    if ((mem_tmr = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
+        php_error(E_ERROR, "Can't open /dev/mem\n");
+    }
+
+    /* mmap TIMER */
+
+    // Allocate MAP block
+    if ((timer_mem = emalloc(BLOCK_SIZE + (PAGE_SIZE-1))) == NULL) {
+        php_error(E_ERROR, "Allocation error\n");
+    }
+
+    // Make sure pointer is on 4K boundary
+    if ((unsigned long)timer_mem % PAGE_SIZE)
+    timer_mem += PAGE_SIZE - ((unsigned long)timer_mem % PAGE_SIZE);
+
+    // Now map it
+    timer_map = (char *)mmap(
+        (caddr_t)timer_mem,
+        BLOCK_SIZE,
+        PROT_READ|PROT_WRITE,
+        MAP_SHARED|MAP_FIXED,
+        mem_tmr,
+        TIMER_BASE
+    );
+
+    if ((long)timer_map < 0) {
+        php_error(E_ERROR, "mmap error timer %d\n", (int)timer_map);
+    }
+
+    // Always use volatile pointer!
+    timer = (volatile unsigned *)timer_map;
+    *(timer + (0x408 >> 2)) = 0xF90200;
+}
+/* }}} setupTimer */
+
+
 /* {{{ proto array usecDelay(int delay)
    */
 PHP_METHOD(Spi, usecDelay)
@@ -360,46 +411,6 @@ zend_module_entry spi_module_entry = {
 ZEND_GET_MODULE(spi)
 #endif
 
-
-
-/* {{{ Access to the ARM timer
-   */
-void setup_timer_file(){
-    /* open /dev/mem */
-    if ((mem_tmr = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
-        php_error(E_ERROR, "Can't open /dev/mem\n");
-    }
-
-    /* mmap TIMER */
-
-    // Allocate MAP block
-    if ((timer_mem = emalloc(BLOCK_SIZE + (PAGE_SIZE-1))) == NULL) {
-        php_error(E_ERROR, "Allocation error\n");
-    }
-
-    // Make sure pointer is on 4K boundary
-    if ((unsigned long)timer_mem % PAGE_SIZE)
-    timer_mem += PAGE_SIZE - ((unsigned long)timer_mem % PAGE_SIZE);
-
-    // Now map it
-    timer_map = (char *)mmap(
-        (caddr_t)timer_mem,
-        BLOCK_SIZE,
-        PROT_READ|PROT_WRITE,
-        MAP_SHARED|MAP_FIXED,
-        mem_tmr,
-        TIMER_BASE
-    );
-
-    if ((long)timer_map < 0) {
-        php_error(E_ERROR, "mmap error timer %d\n", (int)timer_map);
-    }
-
-    // Always use volatile pointer!
-    timer = (volatile unsigned *)timer_map;
-}
-/* }}} setup_timer_file */
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(spi)
 {
@@ -412,7 +423,6 @@ PHP_MINIT_FUNCTION(spi)
     class_init_Spi();
 
     setup_timer_file();
-    *(timer + (0x408 >> 2)) = 0xF90200;
 
     return SUCCESS;
 }
