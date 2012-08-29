@@ -305,7 +305,6 @@ PHP_METHOD(Spi, blockTransfer)
             if(buffer == NULL) {
                 column_count = zend_hash_num_elements(arr_value_hash);
                 buffer       = emalloc(row_count * column_count);
-                // tx           = emalloc(column_count);
             }
 
             for(zend_hash_internal_pointer_reset(arr_value_hash);
@@ -348,7 +347,7 @@ PHP_METHOD(Spi, blockTransfer)
             }
             nanosleep(&sleeper, &dummy);
         }
-        RETURN_TRUE;
+        RETURN_LONG(row_count * column_count);
     } else {
         // array_init(return_value);
         // for(i = 0; i < count; ++i) {
