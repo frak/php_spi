@@ -11,10 +11,24 @@ if(!extension_loaded('spi')) die('skip ');
 
 $spi = new Spi(0, 0);
 $info = $spi->getInfo();
-if(count($info) == 6) {
-    echo 'OK';
+if(count($info) == 5) {
+    echo '1';
 }
-
+if($info['device'] == '/dev/spidev0.0') {
+    echo '2';
+}
+if($info['spi_mode'] == 0) {
+    echo '3';
+}
+if($info['bits'] == 8) {
+    echo '4';
+}
+if($info['speed'] == 500000) {
+    echo '5';
+}
+if($info['delay'] == 0) {
+    echo '6';
+}
 ?>
 --EXPECT--
-OK
+123456
