@@ -258,7 +258,7 @@ PHP_METHOD(Spi, transfer)
 }
 /* }}} transfer */
 
-/* {{{ proto array blockTransfer(array data, int colDelay)
+/* {{{ proto array blockTransfer(array data[, int colDelay[, bool discard]])
    */
 PHP_METHOD(Spi, blockTransfer)
 {
@@ -267,10 +267,10 @@ PHP_METHOD(Spi, blockTransfer)
     zval * _this_zval = NULL;
     zval * data = NULL;
     HashTable * data_hash = NULL;
-    long colDelay = 0;
+    long colDelay = 1;
     zend_bool discard = 0;
 
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oal|b", &_this_zval, Spi_ce_ptr, &data, &colDelay, &discard) == FAILURE) {
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa|lb", &_this_zval, Spi_ce_ptr, &data, &colDelay, &discard) == FAILURE) {
         return;
     }
 
@@ -295,7 +295,7 @@ PHP_METHOD(Spi, blockTransfer)
     zval *sub_arr;
     HashTable *arr_value_hash;
 
-    int i = 0;
+    int i, j = 0;
     for(zend_hash_internal_pointer_reset(data_hash);
         zend_hash_get_current_data(data_hash, (void **)&arr_value) == SUCCESS;
         zend_hash_move_forward(data_hash)) {
@@ -316,46 +316,48 @@ PHP_METHOD(Spi, blockTransfer)
             }
         } else {
             php_error(E_NOTICE, "Row element was not an array, skipping");
+            --row_count;
         }
+    }
+
+    int ret;
+    struct timespec sleeper, dummy;
+    colDelay = colDelay * 1000000;
+    sleeper.tv_sec  = 0;
+    sleeper.tv_nsec = colDelay;
+
+    for(i = 0; i < row_count; ++i) {
+        tx = buffer + (i * column_count);
+        struct spi_ioc_transfer tr = {
+            .tx_buf = (unsigned long)tx,
+            .rx_buf = (unsigned long)tx,
+            .len = column_count,
+            .delay_usecs = delay,
+            .speed_hz = speed,
+            .bits_per_word = bits
+        };
+
+        ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+        if(ret < 1) {
+            php_error(E_WARNING, "Can't send SPI message");
+        }
+        nanosleep(&sleeper, &dummy);
     }
 
     if(discard) {
-        // Not happy about this branch, but I can see the zval
-        // allocation slowing things down a lot
-        // (Plus this is the easy way to start)
-
-        int ret;
-        struct timespec sleeper, dummy;
-        sleeper.tv_sec  = 0;
-        sleeper.tv_nsec = 1000000;
-
-        for(i = 0; i < row_count; ++i) {
-            tx = buffer + (i * column_count);
-
-            struct spi_ioc_transfer tr = {
-                .tx_buf = (unsigned long)tx,
-                .rx_buf = (unsigned long)tx,
-                .len = column_count,
-                .delay_usecs = delay,
-                .speed_hz = speed,
-                .bits_per_word = bits
-            };
-
-            ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-            if(ret < 1) {
-                php_error(E_WARNING, "Can't send SPI message");
-            }
-            nanosleep(&sleeper, &dummy);
-        }
         RETURN_LONG(row_count * column_count);
     } else {
-        // array_init(return_value);
-        // for(i = 0; i < count; ++i) {
-        //     int value = tx[i];
-        //     add_next_index_long(return_value, value);
-        // }
+        array_init(return_value);
+        for(i = 0; i < (row_count + column_count); i += column_count) {
+            zval *row;
+            ALLOC_INIT_ZVAL(row);
+            array_init(row);
+            for(j = 0; j < column_count; ++j) {
+                add_next_index_long(row, buffer[i * column_count + j]);
+            }
+            add_next_index_zval(return_value, row);
+        }
     }
-
 }
 /* }}} blockTransfer */
 
@@ -479,6 +481,7 @@ static zend_function_entry Spi_methods[] = {
     PHP_ME(Spi, __construct, Spi____construct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
     PHP_ME(Spi, __destruct, Spi____destruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
     PHP_ME(Spi, transfer, Spi__transfer_args, /**/ZEND_ACC_PUBLIC)
+    PHP_ME(Spi, blockTransfer, Spi__blockTransfer_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, getInfo, Spi__getInfo_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, setupTimer, Spi__setupTimer_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, usecDelay, Spi__usecDelay_args, /**/ZEND_ACC_PUBLIC)
