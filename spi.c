@@ -215,13 +215,12 @@ PHP_METHOD(Spi, transfer)
 
     data_hash = HASH_OF(data);
 
+    int count = zend_hash_num_elements(data_hash);
+
     int fd = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
-    uint8_t mode = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
     uint8_t bits = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "bits", 4, 0 TSRMLS_CC));
     uint32_t speed = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "speed", 5, 0 TSRMLS_CC));
     uint16_t delay = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "delay", 5, 0 TSRMLS_CC));
-
-    int count = zend_hash_num_elements(data_hash);
 
     unsigned char *tx;
     tx = emalloc(count);
@@ -258,6 +257,111 @@ PHP_METHOD(Spi, transfer)
 
 }
 /* }}} transfer */
+
+/* {{{ proto array blockTransfer(array data[, int colDelay[, bool discard]])
+   */
+PHP_METHOD(Spi, blockTransfer)
+{
+    zend_class_entry * _this_ce;
+
+    zval * _this_zval = NULL;
+    zval * data = NULL;
+    HashTable * data_hash = NULL;
+    long colDelay = 1;
+    zend_bool discard = 0;
+
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa|lb", &_this_zval, Spi_ce_ptr, &data, &colDelay, &discard) == FAILURE) {
+        return;
+    }
+
+    _this_ce = Z_OBJCE_P(_this_zval);
+
+    data_hash = HASH_OF(data);
+
+    int fd         = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "device", 6, 0 TSRMLS_CC));
+    uint8_t mode   = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "mode", 4, 0 TSRMLS_CC));
+    uint8_t bits   = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "bits", 4, 0 TSRMLS_CC));
+    uint32_t speed = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "speed", 5, 0 TSRMLS_CC));
+    uint16_t delay = Z_LVAL_P(zend_read_property(_this_ce, _this_zval, "delay", 5, 0 TSRMLS_CC));
+
+    int row_count    = zend_hash_num_elements(data_hash);
+    int column_count = 0;
+
+    unsigned char *buffer = NULL;
+    unsigned char *start  = NULL;
+    unsigned char *tx     = NULL;
+
+    zval **arr_value;
+    zval **sub_value;
+    zval *sub_arr;
+    HashTable *arr_value_hash;
+
+    int i, j = 0;
+    for(zend_hash_internal_pointer_reset(data_hash);
+        zend_hash_get_current_data(data_hash, (void **)&arr_value) == SUCCESS;
+        zend_hash_move_forward(data_hash)) {
+
+        if(Z_TYPE_PP(arr_value) == IS_ARRAY) {
+            arr_value_hash = Z_ARRVAL_PP(arr_value);
+            if(buffer == NULL) {
+                column_count = zend_hash_num_elements(arr_value_hash);
+                buffer = start = emalloc(row_count * column_count);
+            }
+
+            for(zend_hash_internal_pointer_reset(arr_value_hash);
+                zend_hash_get_current_data(arr_value_hash, (void **)&sub_value) == SUCCESS;
+                zend_hash_move_forward(arr_value_hash)) {
+
+                int byte = (int)Z_LVAL_PP(sub_value);
+                *buffer++ = byte;
+            }
+        } else {
+            php_error(E_NOTICE, "Row element was not an array, skipping");
+            --row_count;
+        }
+    }
+
+    int ret;
+    struct timespec sleeper, dummy;
+    colDelay = colDelay * 1000000;
+    sleeper.tv_sec  = 0;
+    sleeper.tv_nsec = colDelay;
+    buffer = start;
+
+    for(i = 0; i < row_count; ++i) {
+        tx = buffer + (i * column_count);
+        struct spi_ioc_transfer tr = {
+            .tx_buf = (unsigned long)tx,
+            .rx_buf = (unsigned long)tx,
+            .len = column_count,
+            .delay_usecs = delay,
+            .speed_hz = speed,
+            .bits_per_word = bits
+        };
+        ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+        if(ret < 1) {
+            php_error(E_WARNING, "Can't send SPI message");
+        }
+        nanosleep(&sleeper, &dummy);
+    }
+
+    if(discard) {
+        RETURN_LONG(row_count * column_count);
+    } else {
+        buffer = start;
+        array_init(return_value);
+        for(i = 0; i < (row_count + column_count); i += column_count) {
+            zval *row;
+            ALLOC_INIT_ZVAL(row);
+            array_init(row);
+            for(j = 0; j < column_count; ++j) {
+                add_next_index_long(row, *buffer++);
+            }
+            add_next_index_zval(return_value, row);
+        }
+    }
+}
+/* }}} blockTransfer */
 
 /* {{{ proto array getInfo(void)
    */
@@ -346,6 +450,15 @@ PHP_METHOD(Spi, setupTimer)
 }
 /* }}} setupTimer */
 
+void free_timer_delay(long delay)
+{
+    unsigned count_at_start, current_count;
+    count_at_start =  *(timer+(0x420>>2)); // the value of free running counter
+    current_count = count_at_start;
+    while((current_count - count_at_start) < (unsigned)delay) {
+        current_count = *(timer + (0x420 >> 2));
+    }
+}
 
 /* {{{ proto array usecDelay(int delay)
    */
@@ -361,13 +474,7 @@ PHP_METHOD(Spi, usecDelay)
         return;
     }
 
-    unsigned count_at_start, current_count;
-    count_at_start =  *(timer+(0x420>>2)); // the value of free running counter
-    current_count = count_at_start;
-    while((current_count - count_at_start) < (unsigned)delay) {
-        current_count = *(timer + (0x420 >> 2));
-    }
-
+    free_timer_delay(delay);
 }
 /* }}} usecDelay */
 
@@ -376,6 +483,7 @@ static zend_function_entry Spi_methods[] = {
     PHP_ME(Spi, __construct, Spi____construct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
     PHP_ME(Spi, __destruct, Spi____destruct_args, /**/ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
     PHP_ME(Spi, transfer, Spi__transfer_args, /**/ZEND_ACC_PUBLIC)
+    PHP_ME(Spi, blockTransfer, Spi__blockTransfer_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, getInfo, Spi__getInfo_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, setupTimer, Spi__setupTimer_args, /**/ZEND_ACC_PUBLIC)
     PHP_ME(Spi, usecDelay, Spi__usecDelay_args, /**/ZEND_ACC_PUBLIC)

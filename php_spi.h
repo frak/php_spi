@@ -111,6 +111,21 @@ ZEND_END_ARG_INFO()
 #define Spi__transfer_args NULL
 #endif
 
+PHP_METHOD(Spi, blockTransfer);
+#if (PHP_MAJOR_VERSION >= 5)
+ZEND_BEGIN_ARG_INFO_EX(Spi__blockTransfer_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+#if (PHP_MINOR_VERSION > 0)
+  ZEND_ARG_ARRAY_INFO(0, data, 1)
+#else
+  ZEND_ARG_INFO(0, data)
+#endif
+  ZEND_ARG_INFO(0, colDelay)
+  ZEND_ARG_INFO(0, discard)
+ZEND_END_ARG_INFO()
+#else /* PHP 4.x */
+#define Spi__blockTransfer_args NULL
+#endif
+
 PHP_METHOD(Spi, getInfo);
 #if (PHP_MAJOR_VERSION >= 5)
 ZEND_BEGIN_ARG_INFO_EX(Spi__getInfo_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)

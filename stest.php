@@ -38,3 +38,10 @@ if($spi->setupTimer()) {
     echo "You need to run as root to test the timer\n";
 }
 
+$data = array(
+    array(1, 2, 3, 4),
+    array(5, 6, 7, 8),
+    array(9, 10, 11, 12)
+);
+$read = $spi->blockTransfer($data);
+var_dump($read);
