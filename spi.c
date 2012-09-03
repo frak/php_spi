@@ -288,6 +288,7 @@ PHP_METHOD(Spi, blockTransfer)
     int column_count = 0;
 
     unsigned char *buffer = NULL;
+    unsigned char *start  = NULL;
     unsigned char *tx     = NULL;
 
     zval **arr_value;
@@ -304,7 +305,7 @@ PHP_METHOD(Spi, blockTransfer)
             arr_value_hash = Z_ARRVAL_PP(arr_value);
             if(buffer == NULL) {
                 column_count = zend_hash_num_elements(arr_value_hash);
-                buffer       = emalloc(row_count * column_count);
+                buffer = start = emalloc(row_count * column_count);
             }
 
             for(zend_hash_internal_pointer_reset(arr_value_hash);
@@ -312,7 +313,7 @@ PHP_METHOD(Spi, blockTransfer)
                 zend_hash_move_forward(arr_value_hash)) {
 
                 int byte = (int)Z_LVAL_PP(sub_value);
-                buffer[i++] = byte;
+                *buffer++ = byte;
             }
         } else {
             php_error(E_NOTICE, "Row element was not an array, skipping");
@@ -325,6 +326,7 @@ PHP_METHOD(Spi, blockTransfer)
     colDelay = colDelay * 1000000;
     sleeper.tv_sec  = 0;
     sleeper.tv_nsec = colDelay;
+    buffer = start;
 
     for(i = 0; i < row_count; ++i) {
         tx = buffer + (i * column_count);
@@ -346,13 +348,14 @@ PHP_METHOD(Spi, blockTransfer)
     if(discard) {
         RETURN_LONG(row_count * column_count);
     } else {
+        buffer = start;
         array_init(return_value);
         for(i = 0; i < (row_count + column_count); i += column_count) {
             zval *row;
             ALLOC_INIT_ZVAL(row);
             array_init(row);
             for(j = 0; j < column_count; ++j) {
-                add_next_index_long(row, buffer[i * column_count + j]);
+                add_next_index_long(row, *buffer++);
             }
             add_next_index_zval(return_value, row);
         }
