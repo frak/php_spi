@@ -350,7 +350,7 @@ PHP_METHOD(Spi, blockTransfer)
     } else {
         buffer = start;
         array_init(return_value);
-        for(i = 0; i < (row_count + column_count); i += column_count) {
+        for(i = 0; i < row_count; ++i) {
             zval *row;
             ALLOC_INIT_ZVAL(row);
             array_init(row);
