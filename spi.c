@@ -270,7 +270,7 @@ PHP_METHOD(Spi, blockTransfer)
     long colDelay = 1;
     zend_bool discard = 0;
 
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "a|lb", &_this_zval, Spi_ce_ptr, &data, &colDelay, &discard) == FAILURE) {
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa|lb", &_this_zval, Spi_ce_ptr, &data, &colDelay, &discard) == FAILURE) {
         return;
     }
 
@@ -336,7 +336,6 @@ PHP_METHOD(Spi, blockTransfer)
             .speed_hz = speed,
             .bits_per_word = bits
         };
-
         ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
         if(ret < 1) {
             php_error(E_WARNING, "Can't send SPI message");
