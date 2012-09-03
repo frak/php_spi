@@ -43,5 +43,5 @@ $data = array(
     array(5, 6, 7, 8),
     array(9, 10, 11, 12)
 );
-$read = $spi-blockTransfer($data);
+$read = $spi->blockTransfer($data);
 var_dump($read);
