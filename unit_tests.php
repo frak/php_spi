@@ -1,8 +1,6 @@
 #!/usr/bin/env php
 <?php
 
-$noParams = new Spi(0, 1);
-
 $spi = new Spi(0, 0, array(
     'mode' => SPI_MODE_1,
     'speed' => 10000000,
@@ -20,8 +18,9 @@ $data = array(
 $read = $spi->transfer($data);
 
 if($read == $data) {
-    // MOSI connected to MISO
-    var_dump($read);
+    echo "Received data the same as sent\n";
+} else {
+    echo "Have you connected MOSI to MISO?\n";
 }
 
 if($spi->setupTimer()) {
@@ -32,9 +31,10 @@ if($spi->setupTimer()) {
     usleep(1000000);
     $times[2] = microtime(true);
 
-    foreach($times as $time) {
-        echo "Time: {$time}\n";
-    }
+    $method   = $times[1] - $times[0];
+    $function = $times[2] - $times[1];
+    echo "usecDelay delayed for {$method}\n";
+    echo "usleep delayed for {$function}\n";
 } else {
     echo "You need to run as root to test the timer\n";
 }
@@ -44,5 +44,16 @@ $data = array(
     array(5, 6, 7, 8),
     array(9, 10, 11, 12)
 );
-$read = $spi->blockTransfer($data, true);
-var_dump($read);
+$read = $spi->blockTransfer($data);
+if($read == $data) {
+    echo "Block transferred\n";
+} else {
+    echo "Block transfer failed\n";
+}
+
+$read = $spi->blockTransfer($data, 1, true);
+if($read == 12) {
+    echo "12 items sent, 12 items returned\n";
+} else {
+    echo "{$read} data items returned!\n";
+}
