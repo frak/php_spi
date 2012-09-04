@@ -61,6 +61,11 @@ class Image
         return $this->data[$column];
     }
 
+    public function getAll()
+    {
+        return $this->data;
+    }
+
     private function resize($width, $height)
     {
         $ratio = $height / self::HEIGHT;
