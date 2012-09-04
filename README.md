@@ -41,6 +41,10 @@ to fix this you need to:
 
     sudo chmod 666 /dev/spidev*
 
+You can fix this permanently adding this to your /etc/rc.local:
+
+    chmod 666 /dev/spidev*
+
 To access an SPI interface, you need to instantiate an Spi object:
 
     /**
