@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 $noParams = new Spi(0, 1);
@@ -43,5 +44,5 @@ $data = array(
     array(5, 6, 7, 8),
     array(9, 10, 11, 12)
 );
-$read = $spi->blockTransfer($data);
+$read = $spi->blockTransfer($data, true);
 var_dump($read);
