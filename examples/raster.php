@@ -8,5 +8,5 @@ $spi   = new Spi(0, 0, array('speed' => 1000000));
 
 while(true) {
     $spi->blockTransfer($image->getAll(), 1, true);
-    usleep(50000);
+    usleep(500000);
 }
