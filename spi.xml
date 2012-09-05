@@ -36,9 +36,6 @@
         <function access="public" name="__construct">
             <proto>void __construct(int bus, int chipselect[, array options])</proto>
         </function>
-        <function access="public" name="__destruct">
-            <proto>void __destruct()</proto>
-        </function>
         <function access="public" name="transfer">
             <proto>array transfer(array data)</proto>
         </function>
