@@ -2,6 +2,12 @@ This is a standalone PHP extension for accessing SPI on Linux systems.  I have
 no idea if this will build or work on Windows as I have developed it for my
 RaspberryPi, but it should run on any Unix like system with SPI hardware enabled.
 
+My inspiration for building this is the [Light Painting](http://learn.adafruit.com/light-painting-with-raspberry-pi)
+project on AdaFruit. I want to be able to build a similar device, but I want to
+be able to leverage my existing PHP skills rather than feel my way around another
+language. Please check the examples folder for a PHP script for driving the
+display in the same way that they have done with Python.
+
 BUILDING
 ========
 
@@ -107,11 +113,5 @@ argument, default is 1 millisecond).  As this method has been developed primaril
 for sending data to a string of LEDs, there is an optional 3rd parameter which
 when set to true discards the data read from the SPI bus and simply returns the
 number of bytes sent.
-
-My inspiration for building this is the [Light Painting](http://learn.adafruit.com/light-painting-with-raspberry-pi)
-project on AdaFruit. I want to be able to build a similar device, but I want to
-be able to leverage my existing PHP skills rather than feel my way around another
-language. Please check the examples folder for a PHP based script for driving the
-display.
 
 This is an alpha release, please report any issues you experience :o)
