@@ -20,13 +20,13 @@ if($info['device'] == '/dev/spidev0.0') {
 if($info['spi_mode'] == 0) {
     echo '3';
 }
-if($info['bits'] == 8) {
+if($info['bits_per_word'] == 8) {
     echo '4';
 }
-if($info['speed'] == 500000) {
+if($info['speed_hz'] == 500000) {
     echo '5';
 }
-if($info['delay'] == 0) {
+if($info['delay_usec'] == 0) {
     echo '6';
 }
 ?>
