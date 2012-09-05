@@ -49,8 +49,8 @@ You can fix this permanently adding this to your /etc/rc.local:
 
     chmod 666 /dev/spidev*
 
-(The setupTimer/usecDelay methods make use of /dev/mem and therefore
-will always need root access to run)
+***The setupTimer/usecDelay methods make use of /dev/mem and therefore
+will always need root access to run.***
 
 To access an SPI interface, you need to instantiate an Spi object:
 
