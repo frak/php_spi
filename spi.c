@@ -450,16 +450,6 @@ PHP_METHOD(Spi, setupTimer)
 }
 /* }}} setupTimer */
 
-void free_timer_delay(long delay)
-{
-    unsigned count_at_start, current_count;
-    count_at_start =  *(timer+(0x420>>2)); // the value of free running counter
-    current_count = count_at_start;
-    while((current_count - count_at_start) < (unsigned)delay) {
-        current_count = *(timer + (0x420 >> 2));
-    }
-}
-
 /* {{{ proto array usecDelay(int delay)
    */
 PHP_METHOD(Spi, usecDelay)
@@ -474,7 +464,12 @@ PHP_METHOD(Spi, usecDelay)
         return;
     }
 
-    free_timer_delay(delay);
+    unsigned count_at_start, current_count;
+    count_at_start =  *(timer+(0x420>>2)); // the value of free running counter
+    current_count = count_at_start;
+    while((current_count - count_at_start) < (unsigned)delay) {
+        current_count = *(timer + (0x420 >> 2));
+    }
 }
 /* }}} usecDelay */
 
