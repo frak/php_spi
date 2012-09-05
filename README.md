@@ -1,12 +1,13 @@
-This is a standalone PHP extension for accessing SPI on Linux systems.  I have
-no idea if this will build or work on Windows as I have developed it for my
-RaspberryPi, but it should run on any Unix like system with SPI hardware enabled.
+This is a standalone PHP extension for accessing SPI on Linux systems.
+This has been developed solely for my RaspberryPi, but it should run
+on any Unix like system with SPI hardware enabled.
 
 My inspiration for building this is the [Light Painting](http://learn.adafruit.com/light-painting-with-raspberry-pi)
-project on AdaFruit. I want to be able to build a similar device, but I want to
-be able to leverage my existing PHP skills rather than feel my way around another
-language. Please check the examples folder for a PHP script for driving the
-display in the same way that they have done with Python.
+project on AdaFruit. I want to build a similar device, but I want to
+be able to leverage my existing PHP skills rather than feel my way
+around another language. Please check the examples folder for a PHP
+script for driving the display in the same way that they have done
+with Python.
 
 BUILDING
 ========
