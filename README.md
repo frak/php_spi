@@ -101,8 +101,8 @@ Data is sent full-duplex, so if you connect your MOSI and MISO pins to each othe
 (GPIO pins 9 and 10) the data received will exactly match the data sent.
 
 Whilst my tests reveal that no method for timing is ever going to be truly reliable
-I have implemented a timer based on code I found for this [Magic Wand](http://www.thebox.myzen.co.uk/Raspberry/Magic_Wand.html)
-article that I found.  It works based on a free-running timer on the BCM2835 chip,
+I have implemented a timer based on code I found for this [Magic Wand project](http://www.thebox.myzen.co.uk/Raspberry/Magic_Wand.html).
+It works based on a free-running timer on the BCM2835 chip,
 the delay code is very crude, and will peg your CPU at 100% whilst running, but it
 does to seem work more accurately than usleep() most of the time.
 
