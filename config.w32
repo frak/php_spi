@@ -1,8 +1,0 @@
-// $ Id: $
-// vim:ft=javascript
-
-ARG_ENABLE('spi' , 'A PHP extension for accessing SPI', 'no');
-if (PHP_SPI == "yes") {
-  EXTENSION("spi", "spi.c");
-  AC_DEFINE("HAVE_SPI", 1, "spi support");
-}
