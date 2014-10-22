@@ -18,11 +18,13 @@ To be able to build PHP extensions you will need to have the dev package install
 
 To compile your new extension, you will have to execute the following steps:
 
-    $ ./phpize
-    $ ./configure --enable--spi
+    $ phpize
+    $ ./configure --enable-spi
     $ make
     $ make test
     $ sudo make install
+    
+('make test' fails currently, but it works anyway)
 
 TESTING
 =======
