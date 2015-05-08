@@ -21,10 +21,8 @@ To compile your new extension, you will have to execute the following steps:
     $ phpize
     $ ./configure --enable-spi
     $ make
-    $ make test
+    $ sudo make test  #this is because of the timer tests that need access to /dev/mem
     $ sudo make install
-    
-('make test' fails currently, but it works anyway)
 
 TESTING
 =======
