@@ -254,7 +254,7 @@ PHP_METHOD(Spi, transfer)
         int value = tx[i];
         add_next_index_long(return_value, value);
     }
-
+	efree(tx);
 }
 /* }}} transfer */
 
@@ -346,6 +346,8 @@ PHP_METHOD(Spi, blockTransfer)
     }
 
     if(discard) {
+    	efree(buffer);
+    	efree(start);
         RETURN_LONG(row_count * column_count);
     } else {
         buffer = start;
@@ -360,6 +362,8 @@ PHP_METHOD(Spi, blockTransfer)
             add_next_index_zval(return_value, row);
         }
     }
+    efree(buffer);
+    efree(start);
 }
 /* }}} blockTransfer */
 
