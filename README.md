@@ -86,17 +86,37 @@ bus and chipselect parameters:
 
 Once you are connected to the SPI device, you can then transfer data as follows:
 
-    $data = array(
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0x40, 0x00, 0x00, 0x00, 0x00, 0x95,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD,
-        0xF0, 0x0D,
-    );
-    $data = $spi->transfer($data);
-    var_dump($data);
+1) display a red line on first line :  
+
+		$data = array(
+        0x00, 0xFF, 0xFF, 0x01
+		);
+		$data = $spi->transfer($data);
+		var_dump($data);
+    
+2) array detail :
+
+		$data[0] => define Red byte column
+		$data[1] => define Blue byte column
+		$data[2] => define Geen byte column
+		$data[3] => define byte line aimed by previous color
+
+3) if you need to display a red letter or any image, you must create a loop with a quick sleep as follows :
+		
+		$data = array(0xFF, 0xFF, 0xFF, 0xFF);  /* matrix 8x8 is set as Blank
+		# set a array with 8 lines for your char or other.
+		# sample :
+		$Char_A = array(0xFF, 0xDF, OxAF, 0x77, 0x07, 0x77, 0x77, 0x77)
+		while(1)
+			for ($i=0, $i<8, $i++)
+				$data[0] =  $Char_A[$i] /* red color value set by char_A array  
+				$data[1] =  0xFF /* blue color value not set
+				$data[2] =  0xFF /* green color value not set 
+				$data[3] = 0x01 << $i
+				$data = $spi->transfer($data);
+				usleep(20)
+			next
+		do
 
 Data is sent full-duplex, so if you connect your MOSI and MISO pins to each other
 (GPIO pins 9 and 10) the data received will exactly match the data sent.
